@@ -1,0 +1,19 @@
+{
+  "name": "mpiupdater",
+  "version": "1.0.0",
+  "description": "Servicio de actualización de pacientes a mpi",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Team MPI ANDES",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "andes-match": "^0.1.2",
+    "http": "0.0.0",
+    "mongodb": "^2.2.24",
+    "mongoose": "^4.8.6",
+    "typescript": "^2.2.1",
+    "typings": "^2.1.0"
+  }
+}

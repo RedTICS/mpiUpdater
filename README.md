@@ -1,2 +1,12 @@
 # mpiUpdater
-Actualiza el repositorio MPI a partir de información de pacientes validados
+Permite actualizar la base de datos MPI con los pacientes validados de Andes.
+
+## Instalación
+* cd mpiUpdater
+* npm install
+
+### Transpilar la aplicación y ejecutarla
+* tsc index.tsc
+* node index.js
+
+
