@@ -1,10 +1,11 @@
-import { updateMpi } from './updateMpi';
+import { UpdateMpi } from './updateMpi';
 
-let myMpiUpdate = new updateMpi;
+let myMpiUpdate = new UpdateMpi;
 
 function run(){
     let p = new Promise(function(resolve, reject){
-        myMpiUpdate.updatingMpi()   
+        console.log('antes de llamar a updating');
+        myMpiUpdate.updatingMpi();
     })
     .then(function(rta){
         console.log(rta);

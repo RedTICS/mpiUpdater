@@ -3,7 +3,7 @@ import {
 } from './enviarpacienteMpi';
 import {
     matching
-} from 'andes-match/matching';
+} from '@andes/match/matching';
 import * as config from './config';
 import * as mongodb from 'mongodb';
 
@@ -27,12 +27,15 @@ export class UpdateMpi {
                 }
                 let cursorPacientes = db.collection(coleccion).find(condicion).stream();
                 cursorPacientes.on('data', function (data) {
+                    console.log('paciente: ', data);
                     if (data != null) {
                         /*Hacemos una pausa para que de tiempo a la inserción y luego al borrado del paciente*/
                         cursorPacientes.pause();
+                        console.log('despues de la pausa');
                         existeEnMpi(data, coleccion)
                             .then((resultado => {
                                 /*Si NO hubo matching al 100% lo tengo que insertar en MPI */
+                                console.log('volvio de existeEnMpi', resultado);
                                 if (resultado !== {}) {
                                     pacientesInsertados.push(data);
                                     post.cargarUnPacienteMpi(data)
@@ -85,6 +88,7 @@ export class UpdateMpi {
                 gender: 0.1,
                 birthDate: 0.3
             };
+            console.log('antes de llamar a la promise de control de existencia en mpi');
             return new Promise((resolve, reject) => {
                 mongodb.MongoClient.connect(url, function (err, db) {
                     if (err) {
@@ -92,20 +96,22 @@ export class UpdateMpi {
                         reject(err);
                     } else {
                         /*Busco todos los pacientes en MPI que caen en ese bloque */
-                        pacientesEnMpi = db.collection(coleccion).find(condicion).stream();
+                        console.log('entro a buscar los pacientes de bloque');
+                        pacientesEnMpi = db.collection(coleccionPaciente).find(condicion).stream();
                         pacientesEnMpi.on('end', function () {
+                            resolve({}); 
                             db.close();
                         });
                         pacientesEnMpi.on('data', function (data) {
+                            console.log('ingreso al pacientes en mpi stream', data);
                             if (data != null) {
                                 let pacienteDeMpi = data;
                                 porcentajeMatcheo = match.matchPersonas(pacienteBuscado, pacienteDeMpi, weights, tipoDeMatching);
                                 if (porcentajeMatcheo < 1) {
                                     db.close();
-                                    resolve({
-                                        pacienteBuscado
-                                    });
+                                    resolve({pacienteBuscado});
                                 } else {
+                                    console.log('debería devolver vacio');
                                     /*Encontre el paciente al 100% */
                                     resolve({});
                                 }
