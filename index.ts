@@ -4,11 +4,12 @@ let myMpiUpdate = new UpdateMpi;
 
 function run(){
     new Promise(function(resolve, reject){
-        console.log('antes de llamar a updating');
-        myMpiUpdate.updatingMpi();
+        resolve(myMpiUpdate.updatingMpi());
+
     })
     .then(function(rta){
-        console.log(rta);
+        console.log('finaliza proceso', rta);
+        return true;
     })
 }
 /*iniciamos el proceso de envío al mpi extrayendo los datos de los padientes validados en la colección de pacientes ANDES*/

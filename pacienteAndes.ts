@@ -1,19 +1,21 @@
 import * as http from 'http';
 
-export class EnviarpacienteMpi {
-    cargarUnPacienteMpi(paciente: any) {
+export class PacienteAndes {
+borraUnPacienteAndes(id) {
         return new Promise((resolve, reject) => {
             let options = {
                 host: 'localhost',
                 port: 3002,
-                path: '/api/core/mpi/pacientes/mpi',
-                method: 'POST',
+                path: '/api/core/mpi/pacientes/' + id,
+                method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 }
             };
+            console.log('borramos paciente andes', options.path);
             let req = http.request(options, function(res) {
                 res.on('data', function(body) {
+                    console.log('se ve que lo borro');
                     resolve(body);
                 });
             });
@@ -21,10 +23,7 @@ export class EnviarpacienteMpi {
                 console.log('Problemas API : ' + e.message + ' ----- ', e);
                 reject(e.message);
             });
-            /*write data to request body*/
-            req.write(JSON.stringify(paciente));
-            req.end();
+           req.end();
         });
-
     }
 }
