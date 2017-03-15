@@ -23,14 +23,15 @@ export class UpdateMpi {
             let url = config.urlMongoAndes;
             /*La condición de búsqueda es que sea un paciente validado por fuente auténtica*/
             let condicion = {
-                'estado': 'validado'
+                'estado': 'validado',
             };
-            mongodb.MongoClient.connect(url, function (err, db) {
+            mongodb.MongoClient.connect(url, function(err, db) {
                 if (err) {
                     console.log('Error al conectarse a Base de Datos: ', err);
                 }
                 let cursorPacientes = db.collection(coleccion).find(condicion).stream();
-                cursorPacientes.on('data', function (data) {
+                //, {"identificadores._id": 0}
+                cursorPacientes.on('data', function(data) {
                     if (data != null) {
                         /*Hacemos una pausa para que de tiempo a la inserción y luego al borrado del paciente*/
                         cursorPacientes.pause();
@@ -49,27 +50,31 @@ export class UpdateMpi {
                                     let pacFusionar = data;
                                     let idPacMpi = resultado[1]._id;
                                     console.log('El id del paciente a actualizar ', idPacMpi);
-                                    db.collection(coleccion).update(
-                                        {'_id': idPacMpi},
-                                        {
-                                            $set: {
-                                                'direccion': pacFusionar.direccion,
-                                                'contacto': pacFusionar.contacto,
-                                                'relaciones': pacFusionar.relaciones,
-                                            },
-                                            $addToSet: {
-                                                'identificadores': {
-                                                    $each: pacFusionar.identificadores
+                                    let urlMpi = config.urlMongoMpi;
+                                    mongodb.MongoClient.connect(urlMpi, function(errMpi, dbMpi) {
+                                        // Se quitan pacientes
+                                        dbMpi.collection(coleccion).update(
+                                            { '_id': idPacMpi },
+                                            {
+                                                $set: {
+                                                    'direccion': pacFusionar.direccion,
+                                                    'contacto': pacFusionar.contacto,
+                                                    'relaciones': pacFusionar.relaciones,
                                                 },
+                                                $addToSet: {
+                                                    'identificadores': {
+                                                        $each: pacFusionar.identificadores
+                                                    },
+                                                },
+                                            }, {
+                                                upsert: true
                                             },
-                                        }, {
-                                            upsert: true
-                                        },
-                                        function (err) {
-                                            if (err) {
-                                                console.log('Error update', err);
-                                            }
-                                        });
+                                            function(err2) {
+                                                if (err2) {
+                                                    console.log('Error update', err);
+                                                }
+                                            });
+                                    })
                                 }
                                 /*Borramos el paciente de ANDES*/
                                 andesOperations.borraUnPacienteAndes(data._id)
@@ -82,7 +87,7 @@ export class UpdateMpi {
                     };
                 });
                 /*Finaliza el recorrido del cursor con los datos de pacientes validados */
-                cursorPacientes.on('end', function () {
+                cursorPacientes.on('end', function() {
                     console.log('El proceso de actualización ha finalizado, total de pacientes insertados en MPI: ', pacientesInsertados.length);
                     return true;
                 });
@@ -110,7 +115,7 @@ export class UpdateMpi {
             };
             console.log('antes de llamar a la promise de control de existencia en mpi');
             return new Promise((resolve, reject) => {
-                mongodb.MongoClient.connect(url, function (err, db) {
+                mongodb.MongoClient.connect(url, function(err, db) {
                     if (err) {
                         console.log('Error de conexión con ', err);
                         reject(err);
@@ -118,11 +123,11 @@ export class UpdateMpi {
                         /*Busco todos los pacientes en MPI que caen en ese bloque */
                         console.log('entro a buscar los pacientes de bloque');
                         pacientesEnMpi = db.collection(coleccionPaciente).find(condicion).stream();
-                        pacientesEnMpi.on('end', function () {
+                        pacientesEnMpi.on('end', function() {
                             resolve(['insertarNuevo', pacienteBuscado]);
                             db.close();
                         });
-                        pacientesEnMpi.on('data', function (data) {
+                        pacientesEnMpi.on('data', function(data) {
                             if (data != null) {
                                 let pacienteDeMpi = data;
                                 porcentajeMatcheo = match.matchPersonas(pacienteBuscado, pacienteDeMpi, weights, tipoDeMatching);
@@ -132,7 +137,7 @@ export class UpdateMpi {
                                 } else {
                                     console.log('Entro por igual a 1 por lo que hay que hacer el merge del paciente', porcentajeMatcheo);
                                     /*Encontre el paciente al 100% */
-                                    resolve(['merge', pacienteBuscado]);
+                                    resolve(['merge', pacienteDeMpi]);
                                 }
                                 db.close();
                             }
