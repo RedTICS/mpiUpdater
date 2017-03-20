@@ -2,7 +2,8 @@
 export const requestTimeout = 60000;
 export const connectionTimeout = 15000;
 /*Url de las bd*/
-export const urlMongoAndes = 'mongodb://localhost:27017/andes';
+export const urlMongoAndes = 'mongodb://localhost:27017/migracion';
 export const urlMongoMpi = 'mongodb://localhost:27017/mpi';
 /*Colección*/
 export const collection = 'paciente';
+export const collectionMigra = 'pacienteSips';

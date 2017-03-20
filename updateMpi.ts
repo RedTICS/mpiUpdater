@@ -16,7 +16,7 @@ export class UpdateMpi {
         /*Definicion de variables y operaciones*/
         let mpiOperations = new PacienteMpi();
         let andesOperations = new PacienteAndes();
-        let coleccion = config.collection;
+        let coleccion = config.collectionMigra;
         let pacientesInsertados = [];
 
         try {
@@ -25,15 +25,28 @@ export class UpdateMpi {
             let condicion = {
                 'estado': 'validado',
             };
-            mongodb.MongoClient.connect(url, function(err, db) {
+            mongodb.MongoClient.connect(url, function (err, db) {
                 if (err) {
                     console.log('Error al conectarse a Base de Datos: ', err);
                 }
-                let cursorPacientes = db.collection(coleccion).find(condicion).stream();
-                //, {"identificadores._id": 0}
-                cursorPacientes.on('data', function(data) {
+                let cursorPacientes = db.collection(coleccion).find(condicion).stream();                
+                cursorPacientes.on('data', function (data) {
                     if (data != null) {
                         /*Hacemos una pausa para que de tiempo a la inserción y luego al borrado del paciente*/
+                        let listaContactos = [];
+                        if (data.contacto) {
+                            data.contacto.forEach((cto) => {
+                                if ((cto.tipo == "Teléfono Fijo") || (cto.tipo == "")) {
+                                    cto.tipo = "fijo";
+                                }
+                                if (cto.tipo == "Teléfono Celular") {
+                                    cto.tipo = "celular";
+                                }
+                                listaContactos.push(cto);
+                            })
+                        }
+                        //console.log('Lista de contacto: ',listaContactos);
+                        data.contacto = listaContactos;
                         cursorPacientes.pause();
                         existeEnMpi(data, coleccion)
                             .then((resultado => {
@@ -51,11 +64,11 @@ export class UpdateMpi {
                                     let idPacMpi = resultado[1]._id;
                                     console.log('El id del paciente a actualizar ', idPacMpi);
                                     let urlMpi = config.urlMongoMpi;
-                                    mongodb.MongoClient.connect(urlMpi, function(errMpi, dbMpi) {
+                                    mongodb.MongoClient.connect(urlMpi, function (errMpi, dbMpi) {
                                         // Se quitan pacientes
-                                        dbMpi.collection(coleccion).update(
-                                            { '_id': idPacMpi },
-                                            {
+                                        dbMpi.collection(coleccion).update({
+                                                '_id': idPacMpi
+                                            }, {
                                                 $set: {
                                                     'direccion': pacFusionar.direccion,
                                                     'contacto': pacFusionar.contacto,
@@ -69,7 +82,7 @@ export class UpdateMpi {
                                             }, {
                                                 upsert: true
                                             },
-                                            function(err2) {
+                                            function (err2) {
                                                 if (err2) {
                                                     console.log('Error update', err);
                                                 }
@@ -86,8 +99,9 @@ export class UpdateMpi {
                             }))
                     };
                 });
+
                 /*Finaliza el recorrido del cursor con los datos de pacientes validados */
-                cursorPacientes.on('end', function() {
+                cursorPacientes.on('end', function () {
                     console.log('El proceso de actualización ha finalizado, total de pacientes insertados en MPI: ', pacientesInsertados.length);
                     return true;
                 });
@@ -115,7 +129,7 @@ export class UpdateMpi {
             };
             console.log('antes de llamar a la promise de control de existencia en mpi');
             return new Promise((resolve, reject) => {
-                mongodb.MongoClient.connect(url, function(err, db) {
+                mongodb.MongoClient.connect(url, function (err, db) {
                     if (err) {
                         console.log('Error de conexión con ', err);
                         reject(err);
@@ -123,11 +137,11 @@ export class UpdateMpi {
                         /*Busco todos los pacientes en MPI que caen en ese bloque */
                         console.log('entro a buscar los pacientes de bloque');
                         pacientesEnMpi = db.collection(coleccionPaciente).find(condicion).stream();
-                        pacientesEnMpi.on('end', function() {
+                        pacientesEnMpi.on('end', function () {
                             resolve(['insertarNuevo', pacienteBuscado]);
                             db.close();
                         });
-                        pacientesEnMpi.on('data', function(data) {
+                        pacientesEnMpi.on('data', function (data) {
                             if (data != null) {
                                 let pacienteDeMpi = data;
                                 porcentajeMatcheo = match.matchPersonas(pacienteBuscado, pacienteDeMpi, weights, tipoDeMatching);
