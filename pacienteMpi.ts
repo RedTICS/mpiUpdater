@@ -4,9 +4,9 @@ export class PacienteMpi {
     cargarUnPacienteMpi(paciente: any) {
         return new Promise((resolve, reject) => {
             let options = {
-                host: 'localhost',
-                port: 3002,
-                path: '/api/core/mpi/pacientes/mpi',
+                host: config.hostApi,
+                port: config.portApi,
+                path: config.pathPacienteMpi,
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -30,9 +30,9 @@ export class PacienteMpi {
     actualizaUnPacienteMpi(paciente: any) {
         return new Promise((resolve, reject) => {
             let options = {
-                host: 'localhost',
-                port: 3002,
-                path: '/api/core/mpi/pacientes/mpi',
+                host: config.hostApi,
+                port: config.portApi,
+                path: config.pathPacienteMpi,
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -56,9 +56,9 @@ export class PacienteMpi {
     borraUnPacienteMpi(id) {
         return new Promise((resolve, reject) => {
             let options = {
-                host: 'localhost',
-                port: 3002,
-                path: '/api/core/mpi/pacientes/mpi/' + id,
+                host: config.hostApi,
+                port: config.portApi,
+                path: config.pathPacienteMpi + id,
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

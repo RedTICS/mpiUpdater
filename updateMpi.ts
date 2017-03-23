@@ -29,7 +29,7 @@ export class UpdateMpi {
                 if (err) {
                     console.log('Error al conectarse a Base de Datos: ', err);
                 }
-                let cursorPacientes = db.collection(coleccion).find(condicion).stream();                
+                let cursorPacientes = db.collection(coleccion).find(condicion).stream();
                 cursorPacientes.on('data', function (data) {
                     if (data != null) {
                         /*Hacemos una pausa para que de tiempo a la inserción y luego al borrado del paciente*/
@@ -62,7 +62,7 @@ export class UpdateMpi {
                                     los campos de este pacienet al paciente de mpi*/
                                     let pacFusionar = data;
                                     let idPacMpi = resultado[1]._id;
-                                    console.log('El id del paciente a actualizar ', idPacMpi);
+                                    //console.log('El id del paciente a actualizar ', idPacMpi);
                                     let urlMpi = config.urlMongoMpi;
                                     mongodb.MongoClient.connect(urlMpi, function (errMpi, dbMpi) {
                                         // Se quitan pacientes
