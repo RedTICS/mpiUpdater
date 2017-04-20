@@ -1,4 +1,5 @@
 import * as http from 'http';
+import * as config from './config';
 
 export class PacienteMpi {
     cargarUnPacienteMpi(paciente: any) {
@@ -6,7 +7,8 @@ export class PacienteMpi {
             let options = {
                 host: config.hostApi,
                 port: config.portApi,
-                path: config.pathPacienteMpi,
+                //path: config.pathPacienteMpi,
+                path: config.pathPaciente,
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -32,7 +34,8 @@ export class PacienteMpi {
             let options = {
                 host: config.hostApi,
                 port: config.portApi,
-                path: config.pathPacienteMpi,
+                //path: config.pathPacienteMpi,
+                path: config.pathPaciente,
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -53,12 +56,14 @@ export class PacienteMpi {
         });
 
     };
+    /*No debería borrarse un paciente de mpi pero dejamos el método por las dudas*/
     borraUnPacienteMpi(id) {
         return new Promise((resolve, reject) => {
             let options = {
                 host: config.hostApi,
                 port: config.portApi,
-                path: config.pathPacienteMpi + id,
+                //path: config.pathPacienteMpi + id,
+                 path: config.pathPaciente + id,
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

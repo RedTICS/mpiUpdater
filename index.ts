@@ -1,16 +1,14 @@
-import { UpdateMpi } from './updateMpi';
+//import { UpdateMpi } from './updateMpi';
+import * as operations from './updateMpi';
+//let myMpiUpdate = new UpdateMpi;
+//myMpiUpdate.updatingMpi()
 
-let myMpiUpdate = new UpdateMpi;
 
-function run(){
-    new Promise(function(resolve, reject){
-        resolve(myMpiUpdate.updatingMpi());
-
+operations.updatingMpi()
+    .then(rta => {
+     console.log('finaliza proceso');
     })
-    .then(function(rta){
-        console.log('finaliza proceso', rta);
-        return true;
-    })
-}
-/*iniciamos el proceso de envío al mpi extrayendo los datos de los padientes validados en la colección de pacientes ANDES*/
-run();
+    .catch((err) => {
+        console.error('Error**:' + err)
+    });
+
