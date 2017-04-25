@@ -3,17 +3,19 @@ import * as config from './config';
 
 export class PacienteMpi {
     cargarUnPacienteMpi(paciente: any) {
+
+        console.log('entro aca?');
         return new Promise((resolve, reject) => {
             let options = {
                 host: config.hostApi,
                 port: config.portApi,
-                //path: config.pathPacienteMpi,
-                path: config.pathPaciente,
+                path: config.pathPacienteMpi,
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 }
             };
+            console.log('entro al insert de paciente mpi: ', options);
             let req = http.request(options, function(res) {
                 res.on('data', function(body) {
                     resolve(body);
@@ -31,11 +33,11 @@ export class PacienteMpi {
     };
     actualizaUnPacienteMpi(paciente: any) {
         return new Promise((resolve, reject) => {
+            let id = paciente._id;
             let options = {
                 host: config.hostApi,
                 port: config.portApi,
-                //path: config.pathPacienteMpi,
-                path: config.pathPaciente,
+                path: config.pathPacienteMpi + '/' + id,
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -56,14 +58,14 @@ export class PacienteMpi {
         });
 
     };
+
     /*No debería borrarse un paciente de mpi pero dejamos el método por las dudas*/
     borraUnPacienteMpi(id) {
         return new Promise((resolve, reject) => {
             let options = {
                 host: config.hostApi,
                 port: config.portApi,
-                //path: config.pathPacienteMpi + id,
-                 path: config.pathPaciente + id,
+                path: config.pathPacienteMpi + '/' + id,
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

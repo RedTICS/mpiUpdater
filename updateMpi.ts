@@ -24,25 +24,18 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
         let condicion = {
             'claveBlocking.0': pacienteBuscado.claveBlocking[0]
         };
-        let weights = {
-            identity: 0.3,
-            name: 0.3,
-            gender: 0.1,
-            birthDate: 0.3
-        };
+        let weights = config.pesos;
         console.log('antes de llamar a la promise de control de existencia en mpi');
         return new Promise((resolve, reject) => {
-            
             mongodb.MongoClient.connect(url, function (err, db) {
                 if (err) {
                     console.log('Error de conexión con ', err);
                     reject(err);
                 } else {
                     /*Busco todos los pacientes en MPI que caen en ese bloque */
-                    console.log('entro a buscar los pacientes de bloque');
                     pacientesEnMpi = db.collection(coleccionPaciente).find(condicion).stream();
                     pacientesEnMpi.on('end', function () {
-                        resolve(['insertarNuevo', pacienteBuscado]);
+                        resolve(['new', pacienteBuscado]);
                         db.close();
                     });
                     pacientesEnMpi.on('data', function (data) {
@@ -50,13 +43,26 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                             let pacienteDeMpi = data;
                             porcentajeMatcheo = match.matchPersonas(pacienteBuscado, pacienteDeMpi, weights, tipoDeMatching);
                             if (porcentajeMatcheo < 1) {
-                                console.log('ingreso por menor que 1 ', porcentajeMatcheo);
-                                resolve(['insertarNuevo', pacienteBuscado]);
+                                // Inserta como paciente nuevo ya que no matchea al 100%
+                                resolve(['new', pacienteBuscado]);
                             } else {
-                                console.log('Entro por igual a 1 por lo que hay que hacer el merge del paciente', porcentajeMatcheo);
                                 /*Encontre el paciente al 100% */
-                                /*Aca hay q verificar el tema del timestamp de update/insert para subir la última actualización*/
-                                resolve(['merge', pacienteDeMpi]);
+                                /*Para subir la última actualización se debe verificar los timeStamp existentes en caso que en mpi esté más actualizado
+                                se asigna notMerge para controlar que no se haga nada y el registro local sea eliminado de Andes por tener información vieja*/
+                                let mergeFlag = 'merge'; /*Default value*/
+
+                                if (pacienteDeMpi.updatedAt) {
+                                    if (pacienteDeMpi.updatedAt > pacienteBuscado.updatedAt) {
+                                        mergeFlag = 'notMerge';
+                                    }
+                                } else {
+                                    if (pacienteDeMpi.createdAt) {
+                                        if (pacienteDeMpi.createdAt > pacienteBuscado.createdAt) {
+                                            mergeFlag = 'notMerge';
+                                        }
+                                    }
+                                }
+                                resolve([mergeFlag, pacienteDeMpi]);
                             }
                             db.close();
                         }
@@ -92,89 +98,55 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                         resolve(pacientesInsertados);
                     });
                     cursorPacientes.on('data', function (data) {
-                        console.log('entro al on')
                         if (data != null) {
-                            // let listaContactos = [];
-                            // if (data.contacto) {
-                            //     data.contacto.forEach((cto) => {
-                            //         if ((cto.tipo == "Teléfono Fijo") || (cto.tipo == "")) {
-                            //             cto.tipo = "fijo";
-                            //         }
-                            //         if (cto.tipo == "Teléfono Celular") {
-                            //             cto.tipo = "celular";
-                            //         }
-                            //         listaContactos.push(cto);
-                            //     })
-                            // }
-                            //console.log('Lista de contacto: ',listaContactos);
-                            // data.contacto = listaContactos;
                             /*Hacemos una pausa para que de tiempo a la inserción y luego al borrado del paciente*/
                             cursorPacientes.pause();
                             existeEnMpi(data, coleccion)
                                 .then((resultado => {
+                                    console.log('que tiene el valor de la verificacion?: ', resultado[0]);
                                     /*Si NO hubo matching al 100% lo tengo que insertar en MPI */
                                     if (resultado[0] !== 'merge') {
-                                        pacientesInsertados.push(resultado[1]);
-                                        mpiOperations.cargarUnPacienteMpi(resultado[1])
+                                        if (resultado[0] === 'new') {
+                                            pacientesInsertados.push(resultado[1]);
+                                            console.log('cargo un paciente nuevo en mpi');
+                                            mpiOperations.cargarUnPacienteMpi(resultado[1])
                                             .then((rta) => {
                                                 console.log('Paciente Guardado es:', resultado[1]);
                                             });
+                                        }
                                     } else {
                                         /*Se fusionan los pacientes, pacFusionar es un paciente de ANDES y tengo q agregar
                                         los campos de este paciente al paciente de mpi*/
-                                        let pacFusionar = data;
-                                        let idPacMpi = resultado[1]._id;
-                                        let urlMpi = config.urlMongoMpi;
-                                        mongodb.MongoClient.connect(urlMpi, function (errMpi, dbMpi) {
-                                            // Se quitan pacientes
-                                            if (errMpi) {
-                                                console.log('No se pudo conectar a MPI DB');
-                                                reject(errMpi);
-                                            }
-                                            dbMpi.collection(coleccion).update({
-                                                    '_id': idPacMpi
-                                                }, {
-                                                    $set: {
-                                                        'direccion': pacFusionar.direccion,
-                                                        'contacto': pacFusionar.contacto,
-                                                        'relaciones': pacFusionar.relaciones,
-                                                        'estadoCivil': pacFusionar.estadoCivil,
-                                                    },
-                                                    $addToSet: {
-                                                        'identificadores': {
-                                                            $each: pacFusionar.identificadores
-                                                        },
-                                                        'entidadesValidadoras': {
-                                                            $each: pacFusionar.entidadesValidadoras
-                                                        }
-                                                    },
-                                                }, {
-                                                    upsert: true
-                                                },
-                                                function (err2) {
-                                                    if (err2) {
-                                                        console.log('Error update', err2);
-                                                        reject(err);
-                                                    }
-                                                });
-                                        })
+                                        console.log('paciente a mergear en mpi: ', data);
+                                        let pacienteAndes = data;
+                                        let pacienteMpi = resultado[1];
+                                        pacienteMpi.direccion = pacienteAndes.direccion;
+                                        pacienteMpi.contacto = pacienteAndes.contacto;
+                                        pacienteMpi.relaciones = pacienteAndes.relaciones;
+                                        pacienteMpi.estadoCivil = pacienteAndes.estadoCivil;
+                                        pacienteMpi.identificadores = pacienteAndes.identificadores;
+                                        pacienteMpi.entidadesValidadoras = pacienteAndes.entidadesValidadoras;
+                                        mpiOperations.actualizaUnPacienteMpi(pacienteMpi)
+                                        .then((rta) => {
+                                            console.log('El paciente ha sido actualizado: ', pacienteMpi);
+                                        });
                                     }
+                                }))
+                                .then(( resultado => {
                                     /*Borramos el paciente de ANDES*/
                                     andesOperations.borraUnPacienteAndes(data._id)
-                                        .then((rta) => {
-                                            console.log('resultado del borrado:', data);
+                                        .then((rta2) => {
+                                            console.log('borramos el paciente:', rta2);
                                         });
-                                    /*Restablecemos el flujo de trabajo*/
-                                    cursorPacientes.resume();
-                                }))
+                                /*Restablecemos el flujo de trabajo*/
+                                cursorPacientes.resume();
+                                }));
                         };
                     });
                 });
             } catch (err) {
-                console.log('Entra por este error de catch:', err);
+                console.log('Error:', err);
                 return err;
             };
-        })
+        });
     }
-
-//}

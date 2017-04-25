@@ -11,4 +11,10 @@ export const collection = 'paciente';
 export const hostApi = '127.0.0.1';
 export const portApi = 3002;
 export const pathPaciente = '/api/core/mpi/pacientes';
-// export const pathPacienteMpi = '/api/core/mpi/pacientes/mpi';
+export const pathPacienteMpi = '/api/core/mpi/pacientes/mpi';
+export const pesos = {
+     identity: 0.3,
+     name: 0.3,
+     gender: 0.1,
+     birthDate: 0.3
+};
