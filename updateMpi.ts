@@ -25,7 +25,6 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
             'claveBlocking.0': pacienteBuscado.claveBlocking[0]
         };
         let weights = config.pesos;
-        console.log('antes de llamar a la promise de control de existencia en mpi');
         return new Promise((resolve, reject) => {
             mongodb.MongoClient.connect(url, function (err, db) {
                 if (err) {
@@ -103,12 +102,10 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                             cursorPacientes.pause();
                             existeEnMpi(data, coleccion)
                                 .then((resultado => {
-                                    console.log('que tiene el valor de la verificacion?: ', resultado[0]);
                                     /*Si NO hubo matching al 100% lo tengo que insertar en MPI */
                                     if (resultado[0] !== 'merge') {
                                         if (resultado[0] === 'new') {
                                             pacientesInsertados.push(resultado[1]);
-                                            console.log('cargo un paciente nuevo en mpi');
                                             mpiOperations.cargarUnPacienteMpi(resultado[1])
                                             .then((rta) => {
                                                 console.log('Paciente Guardado es:', resultado[1]);
@@ -117,7 +114,6 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                                     } else {
                                         /*Se fusionan los pacientes, pacFusionar es un paciente de ANDES y tengo q agregar
                                         los campos de este paciente al paciente de mpi*/
-                                        console.log('paciente a mergear en mpi: ', data);
                                         let pacienteAndes = data;
                                         let pacienteMpi = resultado[1];
                                         pacienteMpi.direccion = pacienteAndes.direccion;
@@ -136,7 +132,7 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                                     /*Borramos el paciente de ANDES*/
                                     andesOperations.borraUnPacienteAndes(data._id)
                                         .then((rta2) => {
-                                            console.log('borramos el paciente:', rta2);
+                                            console.log('borramos el paciente de Andes:', rta2);
                                         });
                                 /*Restablecemos el flujo de trabajo*/
                                 cursorPacientes.resume();

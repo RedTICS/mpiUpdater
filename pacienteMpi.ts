@@ -3,8 +3,6 @@ import * as config from './config';
 
 export class PacienteMpi {
     cargarUnPacienteMpi(paciente: any) {
-
-        console.log('entro aca?');
         return new Promise((resolve, reject) => {
             let options = {
                 host: config.hostApi,
@@ -15,7 +13,6 @@ export class PacienteMpi {
                     'Content-Type': 'application/json',
                 }
             };
-            console.log('entro al insert de paciente mpi: ', options);
             let req = http.request(options, function(res) {
                 res.on('data', function(body) {
                     resolve(body);
