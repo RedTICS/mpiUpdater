@@ -98,6 +98,7 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                     cursorPacientes.on('end', function () {
                         console.log('El proceso de actualización ha finalizado, total de pacientes insertados en MPI: ', pacientesInsertados.length);
                         resolve(pacientesInsertados);
+                        db.close();
                     });
                     cursorPacientes.on('data', function (data) {
                         if (data != null) {
@@ -115,7 +116,6 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                                                     mpiOperations.cargarUnPacienteMpi(resultado[1], token)
                                                     .then((rta) => {
                                                         console.log('Paciente Guardado es:', resultado[1]);
-                                                        resolve(rta);
                                                     });
                                                 }
                                             } else {
@@ -132,7 +132,6 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                                                 mpiOperations.actualizaUnPacienteMpi(pacienteMpi, token)
                                                 .then((rta) => {
                                                     console.log('El paciente ha sido actualizado: ', pacienteMpi);
-                                                    resolve(rta);
                                                 });
                                             }
                                             cursorPacientes.resume();
