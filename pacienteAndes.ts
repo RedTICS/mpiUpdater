@@ -2,14 +2,15 @@ import * as http from 'http';
 import * as config from './config';
 
 export class PacienteAndes {
-    borraUnPacienteAndes(id) {
+    borraUnPacienteAndes(paciente, token) {
         return new Promise((resolve, reject) => {
             let options = {
                 host: config.hostApi,
                 port: config.portApi,
-                path: config.pathPaciente + '/' + id,
+                path: config.pathPaciente + '/' + paciente._id,
                 method: 'DELETE',
                 headers: {
+                    'Authorization': token,
                     'Content-Type': 'application/json',
                 }
             };

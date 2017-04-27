@@ -78,7 +78,7 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
         });
     }
 
-  export function  updatingMpi() {
+  export function updatingMpi(token) {
         /*Definicion de variables y operaciones*/
         let mpiOperations = new PacienteMpi();
         let andesOperations = new PacienteAndes();
@@ -109,14 +109,15 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                             cursorPacientes.pause();
                             existeEnMpi(data, coleccion)
                                 .then(resultado => {
-                                    andesOperations.borraUnPacienteAndes(data._id)
+                                    //andesOperations.borraUnPacienteAndes(data._id)
+                                    andesOperations.borraUnPacienteAndes(resultado[1], token)
                                         .then((rta2) => {
                                             console.log('borramos el paciente de Andes:', rta2);
                                             /*Si NO hubo matching al 100% lo tengo que insertar en MPI */
                                             if (resultado[0] !== 'merge') {
                                                 if (resultado[0] === 'new') {
                                                     pacientesInsertados.push(resultado[1]);
-                                                    mpiOperations.cargarUnPacienteMpi(resultado[1])
+                                                    mpiOperations.cargarUnPacienteMpi(resultado[1], token)
                                                     .then((rta) => {
                                                         console.log('Paciente Guardado es:', resultado[1]);
                                                     });
@@ -132,52 +133,14 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                                                 pacienteMpi.estadoCivil = pacienteAndes.estadoCivil;
                                                 pacienteMpi.identificadores = pacienteAndes.identificadores;
                                                 pacienteMpi.entidadesValidadoras = pacienteAndes.entidadesValidadoras;
-                                                mpiOperations.actualizaUnPacienteMpi(pacienteMpi)
+                                                mpiOperations.actualizaUnPacienteMpi(pacienteMpi, token)
                                                 .then((rta) => {
                                                     console.log('El paciente ha sido actualizado: ', pacienteMpi);
                                                 });
                                             }
                                             cursorPacientes.resume();
                                         });
-                                })
-                                // .then((resultado => {
-
-                                //     /*Si NO hubo matching al 100% lo tengo que insertar en MPI */
-                                //     if (resultado[0] !== 'merge') {
-                                //         if (resultado[0] === 'new') {
-                                //             pacientesInsertados.push(resultado[1]);
-                                //             mpiOperations.cargarUnPacienteMpi(resultado[1])
-                                //             .then((rta) => {
-                                //                 console.log('Paciente Guardado es:', resultado[1]);
-                                //             });
-                                //         }
-                                //     } else {
-                                //         /*Se fusionan los pacientes, pacFusionar es un paciente de ANDES y tengo q agregar
-                                //         los campos de este paciente al paciente de mpi*/
-                                //         let pacienteAndes = data;
-                                //         let pacienteMpi = resultado[1];
-                                //         pacienteMpi.direccion = pacienteAndes.direccion;
-                                //         pacienteMpi.contacto = pacienteAndes.contacto;
-                                //         pacienteMpi.relaciones = pacienteAndes.relaciones;
-                                //         pacienteMpi.estadoCivil = pacienteAndes.estadoCivil;
-                                //         pacienteMpi.identificadores = pacienteAndes.identificadores;
-                                //         pacienteMpi.entidadesValidadoras = pacienteAndes.entidadesValidadoras;
-                                //         mpiOperations.actualizaUnPacienteMpi(pacienteMpi)
-                                //         .then((rta) => {
-                                //             console.log('El paciente ha sido actualizado: ', pacienteMpi);
-                                //         });
-                                //     }
-                                //     cursorPacientes.resume();
-                                // }));
-                                // .then(( resultado => {
-                                //     /*Borramos el paciente de ANDES*/
-                                //     andesOperations.borraUnPacienteAndes(data._id)
-                                //         .then((rta2) => {
-                                //             console.log('borramos el paciente de Andes:', rta2);
-                                //         });
-                                // /*Restablecemos el flujo de trabajo*/
-                                // cursorPacientes.resume();
-                                // }));
+                                });
                         };
                     });
                 });

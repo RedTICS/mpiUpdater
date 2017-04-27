@@ -2,14 +2,16 @@ import * as http from 'http';
 import * as config from './config';
 
 export class PacienteMpi {
-    cargarUnPacienteMpi(paciente: any) {
+    cargarUnPacienteMpi(paciente: any, token) {
         return new Promise((resolve, reject) => {
             let options = {
                 host: config.hostApi,
                 port: config.portApi,
                 path: config.pathPacienteMpi,
+                Authentication: token,
                 method: 'POST',
                 headers: {
+                    'Authorization': token,
                     'Content-Type': 'application/json',
                 }
             };
@@ -28,7 +30,7 @@ export class PacienteMpi {
         });
 
     };
-    actualizaUnPacienteMpi(paciente: any) {
+    actualizaUnPacienteMpi(paciente: any, token) {
         return new Promise((resolve, reject) => {
             let id = paciente._id;
             let options = {
@@ -37,6 +39,7 @@ export class PacienteMpi {
                 path: config.pathPacienteMpi + '/' + id,
                 method: 'PUT',
                 headers: {
+                    'Authorization': token,
                     'Content-Type': 'application/json',
                 }
             };
@@ -57,14 +60,15 @@ export class PacienteMpi {
     };
 
     /*No debería borrarse un paciente de mpi pero dejamos el método por las dudas*/
-    borraUnPacienteMpi(id) {
+    borraUnPacienteMpi(paciente, token) {
         return new Promise((resolve, reject) => {
             let options = {
                 host: config.hostApi,
                 port: config.portApi,
-                path: config.pathPacienteMpi + '/' + id,
+                path: config.pathPacienteMpi + '/' + paciente._id,
                 method: 'DELETE',
                 headers: {
+                    'Authorization': token,
                     'Content-Type': 'application/json',
                 }
             };
