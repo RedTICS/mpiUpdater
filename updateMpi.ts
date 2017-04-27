@@ -10,10 +10,6 @@ import {
 import * as config from './config';
 import * as mongodb from 'mongodb';
 
-// export class UpdateMpi {
-
-
-
     /*Verfica que el paciente que si desea insertar en MPI no exista previamente*/
 export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
         let url = config.urlMongoMpi;
@@ -109,7 +105,6 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                             cursorPacientes.pause();
                             existeEnMpi(data, coleccion)
                                 .then(resultado => {
-                                    //andesOperations.borraUnPacienteAndes(data._id)
                                     andesOperations.borraUnPacienteAndes(resultado[1], token)
                                         .then((rta2) => {
                                             console.log('borramos el paciente de Andes:', rta2);
@@ -120,6 +115,7 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                                                     mpiOperations.cargarUnPacienteMpi(resultado[1], token)
                                                     .then((rta) => {
                                                         console.log('Paciente Guardado es:', resultado[1]);
+                                                        resolve(rta);
                                                     });
                                                 }
                                             } else {
@@ -136,6 +132,7 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                                                 mpiOperations.actualizaUnPacienteMpi(pacienteMpi, token)
                                                 .then((rta) => {
                                                     console.log('El paciente ha sido actualizado: ', pacienteMpi);
+                                                    resolve(rta);
                                                 });
                                             }
                                             cursorPacientes.resume();
@@ -146,7 +143,7 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                 });
             } catch (err) {
                 console.log('Error:', err);
-                return err;
+                reject(err);
             };
         });
     }
