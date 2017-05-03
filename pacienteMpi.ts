@@ -49,7 +49,6 @@ export class PacienteMpi {
                 });
             });
             req.on('error', function(e) {
-                console.log('El paciente ID es:  ', id);
                 console.log('Problemas API en update : ' + e.message + ' ----- ', e);
                 reject(e.message);
             });

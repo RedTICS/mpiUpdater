@@ -14,7 +14,7 @@ export const pathPaciente = '/api/core/mpi/pacientes';
 export const pathPacienteMpi = '/api/core/mpi/pacientes/mpi';
 /*CONFIGURACIONES*/
 export const loginData = {
-                usuario : '27381849',  /* Este usuario es de prueba y corresponde al mpiUpdater */
+                usuario : '11111111',  /* Este usuario es de prueba y corresponde al mpiUpdater */
                 password : '1',
                 organizacion : '57e9670e52df311059bc8964',
 };
