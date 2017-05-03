@@ -16,11 +16,13 @@ export class PacienteAndes {
             };
             let req = http.request(options, function (res) {
                 res.on('data', function (body) {
+                    console.log('El paciente fue borrado de la base');
                     resolve(body);
                 });
             });
             req.on('error', function (e) {
-                console.log('Problemas API : ' + e.message + ' ----- ', e);
+                console.log('El paciente ID es:  ', paciente._id);
+                console.log('Problemas API al borrar un paciente : ' + e.message + ' ----- ', e);
                 reject(e.message);
             });
             req.end();

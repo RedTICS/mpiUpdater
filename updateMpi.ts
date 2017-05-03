@@ -37,6 +37,7 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                         if (data != null) {
                             let pacienteDeMpi = data;
                             porcentajeMatcheo = match.matchPersonas(pacienteBuscado, pacienteDeMpi, weights, tipoDeMatching);
+                            console.log('% de matching: ', porcentajeMatcheo );
                             if (porcentajeMatcheo < 1) {
                                 // Inserta como paciente nuevo ya que no matchea al 100%
                                 resolve(['new', pacienteBuscado]);
@@ -45,7 +46,6 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                                 /*Para subir la última actualización se debe verificar los timeStamp existentes en caso que en mpi esté más actualizado
                                 se asigna notMerge para controlar que no se haga nada y el registro local sea eliminado de Andes por tener información vieja*/
                                 let mergeFlag = 'merge'; /*Default value*/
-
                                 if (pacienteDeMpi.updatedAt && pacienteBuscado.updatedAt) {
                                     if (pacienteDeMpi.updatedAt > pacienteBuscado.updatedAt) {
                                         mergeFlag = 'notMerge';
@@ -64,7 +64,7 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                                         }
                                     }
                                 }
-                                resolve([mergeFlag, pacienteDeMpi]);
+                                resolve([mergeFlag, pacienteBuscado]);
                             }
                             db.close();
                         }
@@ -112,15 +112,18 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                                             /*Si NO hubo matching al 100% lo tengo que insertar en MPI */
                                             if (resultado[0] !== 'merge') {
                                                 if (resultado[0] === 'new') {
+                                                    console.log('entra por nuevo');
                                                     pacientesInsertados.push(resultado[1]);
                                                     mpiOperations.cargarUnPacienteMpi(resultado[1], token)
                                                     .then((rta) => {
-                                                        console.log('Paciente Guardado es:', resultado[1]);
+                                                        console.log('se inserto a mpi el paciente: ', resultado[1]._id);
+                                                       // console.log('Paciente Guardado es:', resultado[1]);
                                                     });
                                                 }
                                             } else {
                                                 /*Se fusionan los pacientes, pacFusionar es un paciente de ANDES y tengo q agregar
                                                 los campos de este paciente al paciente de mpi*/
+                                                console.log('entra por update');
                                                 let pacienteAndes = data;
                                                 let pacienteMpi = resultado[1];
                                                 pacienteMpi.direccion = pacienteAndes.direccion;
@@ -131,17 +134,18 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                                                 pacienteMpi.entidadesValidadoras = pacienteAndes.entidadesValidadoras;
                                                 mpiOperations.actualizaUnPacienteMpi(pacienteMpi, token)
                                                 .then((rta) => {
-                                                    console.log('El paciente ha sido actualizado: ', pacienteMpi);
+                                                    //console.log('El paciente ha sido actualizado: ', pacienteMpi);
                                                 });
                                             }
-                                            cursorPacientes.resume();
+                                            // cursorPacientes.resume();
                                         });
+                                        cursorPacientes.resume();
                                 });
                         };
                     });
                 });
             } catch (err) {
-                console.log('Error:', err);
+                console.log('Error catch:', err);
                 reject(err);
             };
         });
