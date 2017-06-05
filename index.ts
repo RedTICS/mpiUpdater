@@ -10,6 +10,7 @@ function mpiUpdaterRun() {
         operations.updatingMpi(value.token)
             .then(rta => {
                 console.log('finaliza proceso');
+                console.log('Fecha de ejecución: ', new Date().toString());
             })
             .catch((err) => {
               console.error('Error**:' + err);
