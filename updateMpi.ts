@@ -6,13 +6,14 @@ import {
 } from './pacienteAndes';
 import {
     matching
-} from '@andes/match/matching';
+} from '@andes/match';
 import * as config from './config';
+import * as configPrivate from './config.private';
 import * as mongodb from 'mongodb';
 
     /*Verfica que el paciente que si desea insertar en MPI no exista previamente*/
 export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
-        let url = config.urlMongoMpi;
+        let url = configPrivate.urlMongoMpi;
         let pacientesEnMpi: any = [];
         let match = new matching();
         let tipoDeMatching = 'Levenshtein';
@@ -83,7 +84,7 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
         return new Promise((resolve, reject) => {
 
             try {
-                let url = config.urlMongoAndes;
+                let url = configPrivate.urlMongoAndes;
                 /*La condición de búsqueda es que sea un paciente validado por fuente auténtica*/
                 let condicion = {
                     'estado': 'validado',
@@ -114,7 +115,7 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                                                     pacientesInsertados.push(resultado[1]);
                                                     mpiOperations.cargarUnPacienteMpi(resultado[1], token)
                                                     .then((rta) => {
-                                                       // console.log('Paciente Guardado es:', resultado[1]);
+                                                        console.log('Paciente Guardado es:', resultado[1]);
                                                     });
                                                 }
                                             } else {
@@ -130,7 +131,7 @@ export function existeEnMpi(pacienteBuscado, coleccionPaciente) {
                                                 pacienteMpi.entidadesValidadoras = pacienteAndes.entidadesValidadoras;
                                                 mpiOperations.actualizaUnPacienteMpi(pacienteMpi, token)
                                                 .then((rta) => {
-                                                    //console.log('El paciente ha sido actualizado: ', pacienteMpi);
+                                                    console.log('El paciente ha sido actualizado: ', pacienteMpi);
                                                 });
                                             }
                                         });

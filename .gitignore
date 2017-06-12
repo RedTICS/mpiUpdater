@@ -19,6 +19,9 @@
 *.launch
 .settings/
 
+# Archivos de configuración
+config.private.ts
+
 # misc
 /.sass-cache
 /connect.lock
