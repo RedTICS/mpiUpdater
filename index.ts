@@ -1,8 +1,8 @@
 import * as operations from './updateMpi';
-import * as config from './config';
+import * as configPrivate from './config.private';
 
 function mpiUpdaterRun() {
-    let token = 'JWT ' + config.tokenApp;
+    let token = 'JWT ' + configPrivate.tokenApp;
     operations.updatingMpi(token)
                 .then(rta => {
                     console.log('finaliza proceso');
