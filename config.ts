@@ -1,3 +1,5 @@
+import * as configPrivate from './config.private';
+
 
 /*Constantes de timeout en caso de necesitarlas*/
 export const requestTimeout = 60000;
@@ -6,8 +8,8 @@ export const connectionTimeout = 15000;
 /*Colección*/
 export const collection = 'paciente';
 /*PATHS*/
-export const hostApi = '127.0.0.1';
-export const portApi = 3002;
+export const hostApi = configPrivate.host;
+export const portApi = configPrivate.port;
 export const pathPaciente = '/api/core/mpi/pacientes';
 export const pathPacienteMpi = '/api/core/mpi/pacientes/mpi';
 /*CONFIGURACIONES VARIAS*/
