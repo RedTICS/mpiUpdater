@@ -114,7 +114,7 @@ export function updatingMpi(token: any) {
                                                 pacientesInsertados.push(resultado[1]);
                                                 mpiOperations.cargarUnPacienteMpi(resultado[1], token)
                                                     .then((rta4: any) => {
-                                                        // console.log('Paciente Guardado es:', resultado[1]);
+                                                        console.log('Paciente Guardado es:', resultado[1]);
                                                     });
                                             }
                                         } else {
@@ -130,7 +130,7 @@ export function updatingMpi(token: any) {
                                             pacienteMpi.entidadesValidadoras = pacienteAndes.entidadesValidadoras;
                                             mpiOperations.actualizaUnPacienteMpi(pacienteMpi, token)
                                                 .then((rta5: any) => {
-                                                    // console.log('El paciente ha sido actualizado: ', pacienteMpi);
+                                                     console.log('El paciente ha sido actualizado: ', pacienteMpi);
                                                 });
                                         }
                                     });
