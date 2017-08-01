@@ -5,6 +5,9 @@ import * as configPrivate from './config.private';
 export const requestTimeout = 60000;
 export const connectionTimeout = 15000;
 
+/* Tipo de algoritmo de match */
+export const tipoAlgoritmo = 'Levenshtein';
+
 /*Colección*/
 export const collection = 'paciente';
 /*PATHS*/

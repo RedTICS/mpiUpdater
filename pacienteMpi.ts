@@ -2,8 +2,8 @@ import * as http from 'http';
 import * as config from './config';
 
 export class PacienteMpi {
-    cargarUnPacienteMpi(paciente: any, token) {
-        return new Promise((resolve, reject) => {
+    cargarUnPacienteMpi(paciente: any, token: any) {
+        return new Promise((resolve: any, reject: any) => {
             let options = {
                 host: config.hostApi,
                 port: config.portApi,
@@ -30,8 +30,8 @@ export class PacienteMpi {
         });
 
     };
-    actualizaUnPacienteMpi(paciente: any, token) {
-        return new Promise((resolve, reject) => {
+    actualizaUnPacienteMpi(paciente: any, token: any) {
+        return new Promise((resolve: any, reject: any) => {
             let id = paciente._id;
             let options = {
                 host: config.hostApi,
@@ -59,9 +59,9 @@ export class PacienteMpi {
 
     };
 
-    /*No debería borrarse un paciente de mpi pero dejamos el método por las dudas*/
-    borraUnPacienteMpi(paciente, token) {
-        return new Promise((resolve, reject) => {
+    /*No debería borrarse un paciente de mpi pero dejamos implementado el método por las dudas*/
+    borraUnPacienteMpi(paciente: any, token: any) {
+        return new Promise((resolve: any, reject: any) => {
             let options = {
                 host: config.hostApi,
                 port: config.portApi,

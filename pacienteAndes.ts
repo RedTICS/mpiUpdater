@@ -16,7 +16,7 @@ export class PacienteAndes {
             };
             let req = http.request(options, function (res) {
                 res.on('data', function (body) {
-                    console.log('Se ha borrado el paciente', body);
+                    console.log('Se ha borrado el paciente', paciente);
                     resolve(body);
                 });
             });

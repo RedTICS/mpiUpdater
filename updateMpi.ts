@@ -17,7 +17,7 @@ export function existeEnMpi(pacienteBuscado: any, coleccionPaciente: any) {
     let url = configPrivate.urlMongoMpi;
     let pacientesEnMpi: any = [];
     let match = new matching();
-    let tipoDeMatching = 'Levenshtein';
+    let tipoDeMatching = config.tipoAlgoritmo;
     let porcentajeMatcheo;
     let condicion = {
         'claveBlocking.0': pacienteBuscado.claveBlocking[0]
@@ -31,14 +31,14 @@ export function existeEnMpi(pacienteBuscado: any, coleccionPaciente: any) {
             } else {
                 /*Busco todos los pacientes en MPI que caen en ese bloque */
                 pacientesEnMpi = db.collection(coleccionPaciente).find(condicion).stream();
-                pacientesEnMpi.on('end', function () {
+                pacientesEnMpi.on('end', function () { // Si no lo encontró, devuelvo el paciente
                     resolve(['new', pacienteBuscado]);
                     db.close();
                 });
                 pacientesEnMpi.on('data', function (data: any) {
                     if (data != null) {
                         let pacienteDeMpi = data;
-                        porcentajeMatcheo = match.matchPersonas(pacienteBuscado, pacienteDeMpi, weights, tipoDeMatching);
+                        porcentajeMatcheo = match.matchPersonas(pacienteBuscado, pacienteDeMpi, weights, tipoDeMatching); // Por cada paciente lo comparo con el paciente Buscado
                         if (porcentajeMatcheo < 1) {
                             // Inserta como paciente nuevo ya que no matchea al 100%
                             resolve(['new', pacienteBuscado]);
@@ -47,11 +47,14 @@ export function existeEnMpi(pacienteBuscado: any, coleccionPaciente: any) {
                             /*Para subir la última actualización se debe verificar los timeStamp existentes en caso que en mpi esté más actualizado
                             se asigna notMerge para controlar que no se haga nada y el registro local sea eliminado de Andes por tener información vieja*/
                             let mergeFlag = 'merge'; /*Default value*/
+                            
+                            // Primero verifico por UPDATE
                             if (pacienteDeMpi.updatedAt && pacienteBuscado.updatedAt) {
                                 if (pacienteDeMpi.updatedAt > pacienteBuscado.updatedAt) {
                                     mergeFlag = 'notMerge';
                                 }
                             } else {
+                                // Verifico por CREATE
                                 if (pacienteDeMpi.createdAt && pacienteBuscado.createdAt) {
                                     if (pacienteDeMpi.createdAt > pacienteBuscado.createdAt) {
                                         if (pacienteDeMpi.updatedAt) {
@@ -78,7 +81,7 @@ export function updatingMpi(token: any) {
     /*Definicion de variables y operaciones*/
     let mpiOperations = new PacienteMpi();
     let andesOperations = new PacienteAndes();
-    let coleccion = config.collection;
+    let coleccion = config.collection; // La Collection es paciente
     let pacientesInsertados: any = [];
     let counter = 0;
     return new Promise((resolve: any, reject: any) => {
@@ -89,9 +92,10 @@ export function updatingMpi(token: any) {
             let condicion = {
                 'estado': 'validado',
             };
-            mongodb.MongoClient.connect(url, function (err2: any, db: any) {
-                if (err2) {
-                    reject(err2);
+            mongodb.MongoClient.connect(url, function (err: any, db: any) {
+                if (err) {
+                    console.log('Error de conexión a la base de datos');
+                    reject(err);
                 }
                 let cursorPacientes = db.collection(coleccion).find(condicion).stream();
                 /*Finaliza el recorrido del cursor con los datos de pacientes validados */
@@ -101,7 +105,7 @@ export function updatingMpi(token: any) {
                     db.close();
                 });
                 cursorPacientes.on('data', function (data: any) {
-                    if (data != null) {
+                    if (data !== null) {
                         /*Hacemos una pausa para que de tiempo a la inserción y luego al borrado del paciente*/
                         cursorPacientes.pause();
                         existeEnMpi(data, coleccion)
