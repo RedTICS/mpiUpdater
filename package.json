@@ -10,7 +10,7 @@
   "license": "GPL-3.0",
   "dependencies": {
     "@andes/auth": "^0.2.4",
-    "@andes/match": "^0.1.5",
+    "@andes/match": "^0.1.9",
     "@types/node": "^8.0.15",
     "http": "0.0.0",
     "mongodb": "^2.2.24",

@@ -2,7 +2,7 @@ import * as http from 'http';
 import * as config from './config';
 
 export class PacienteAndes {
-    borraUnPacienteAndes(paciente, token) {
+    borraUnPacienteAndes(paciente: any, token: any) {
         return new Promise((resolve, reject) => {
             let options = {
                 host: config.hostApi,
